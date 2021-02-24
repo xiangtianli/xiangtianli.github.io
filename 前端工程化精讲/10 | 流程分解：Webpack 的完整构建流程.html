@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>搬砖工</title>
+<Link rel="stylesheet" href="/css/md.css" />
+<Link rel="stylesheet" href="/css/hl.css" />
+<style>
+#root { padding: 20px; } 
+</style>
+</head>
+<body>
+<div id="root">
+  <div class="markdown-body">
+  <h3 data-nodeid="16221">任务式构建工具</h3>
+<blockquote data-nodeid="16222">
+<p data-nodeid="16223">任务式构建工具发展历程回顾：<br>
+2012 年，Ben Alman 发布了基于任务的构建工具 <a href="https://bocoup.com/blog/introducing-grunt" data-nodeid="16470">Grunt</a>。<br>
+2013 年，Eric Schoffstall 发布了流式的构建工具 <a href="https://gulpjs.com/" data-nodeid="16476">Gulp</a>。</p>
+</blockquote>
+<p data-nodeid="16224">随着 NodeJS 和 npm 的发布，大量的前端工具包发布到 npm 仓库，开发者通过简单的命令行指令就可以方便地下载和使用，前端的工程化也在这一时期开始蓬勃发展。其中一种趋势就是，使用自动化的任务式构建工具来替代手工执行各种处理命令。</p>
+<p data-nodeid="16225">Grunt 和 Gulp 这两种任务式的构建工具的基本组成包括：核心的处理工具（grunt-cli/gulp-cli）、配置文件（Gruntfile/Gulpfile），以及一系列常用的任务插件（Clean、Watch、Copy、Concat、Uglify、CssMin、Spritesmith......）。在项目里通过编写配置文件，就可以定义工作流程中的各种自动化构建处理，例如在发生变更时，通过 Watch 插件监控文件，从而自动执行代码的检查与压缩等。</p>
+<h4 data-nodeid="16226">Grunt vs Gulp</h4>
+<p data-nodeid="16227">这两种工具的差异性主要体现在：</p>
+<ul data-nodeid="16228">
+<li data-nodeid="16229">
+<p data-nodeid="16230"><strong data-nodeid="16490">读写速度</strong>：Gulp 在处理任务的过程中基于 NodeJS 的数据流，本质上是操读写内存，而 Grunt 则是基于临时文件，因此在读写速度上 Gulp 要<a href="http://tech.tmw.co.uk/2014/01/speedtesting-gulp-and-grunt/" data-nodeid="16488">快于</a>Grunt。</p>
+</li>
+<li data-nodeid="16231">
+<p data-nodeid="16232"><strong data-nodeid="16495">社区使用规模</strong>：截止编写课程的时间点，在 npmjs.com 的周下载量方面，Gulp 为 1,200,000+，约是 Grunt 的两倍。而在插件数量方面，Grunt 社区提供了超过 6000 个不同功能的插件，而 Gulp 社区的插件数量则是 4000 多个。</p>
+</li>
+<li data-nodeid="16233">
+<p data-nodeid="16234"><strong data-nodeid="16500">配置文件的易用性</strong>：相比描述不同插件配置信息的 Gruntfile 而言，使用 pipe 函数描述任务处理过程的方式通常更易于阅读，但编写时需要对数据流有更深入的理解。</p>
+</li>
+</ul>
+<p data-nodeid="16235">任务式的构建工具，虽然解决了开发流程中自动化执行预设任务的问题，但不能解决项目中代码如何组织成不同功能的代码包、不同代码之间如何相互依赖等问题。而解决这类问题的方式就是：模块化。</p>
+<h3 data-nodeid="16236">模块化：模块定义与模块化的构建工具</h3>
+<blockquote data-nodeid="16237">
+<p data-nodeid="16238">模块化发展历程回顾：<br>
+2009 年，Kevin Dangoor 发起了 ServerJS 项目，后更名为 <a href="https://en.wikipedia.org/wiki/CommonJS" data-nodeid="16508">CommonJS</a>，其目标是指定浏览器外的 JS API 规范（例如 FS、Stream、Buffer 等）以及模块规范 <a href="http://wiki.commonjs.org/wiki/Modules/1.0" data-nodeid="16512">Modules/1.0</a>。这一规范也成为同年发布的 NodeJS 中的模块定义的参照规范。<br>
+2011 年，RequireJS 1.0 版本发布，作为客户端的模块加载器，提供了异步加载模块的能力。作者在之后提交了 CommonJS 的 Module/Transfer/C 提案，这一提案最终发展为了独立的 <a href="https://github.com/amdjs/amdjs-api/blob/master/AMD.md" data-nodeid="16518">AMD 规范</a>。<br>
+2013 年，面向浏览器端模块的打包工具<a href="http://browserify.org/" data-nodeid="16524">Browserify</a>发布。<br>
+2014 年，跨平台的前后端兼容的模块化定义语法 <a href="https://github.com/umdjs/umd" data-nodeid="16530">UMD</a>发布。<br>
+2014 年，Sebastian McKenzie 发布了将 ES6 语法转换为 ES5 语法的工具 <a href="https://babeljs.io/blog/2015/03/31/5.0.0" data-nodeid="16536">6to5</a>，并在之后更名为<strong data-nodeid="16570">Babel</strong>。<br>
+2014 年，Guy Bedford 对外发布了 <a href="https://github.com/systemjs/systemjs" data-nodeid="16546">SystemJS</a> 和 <a href="https://github.com/jspm" data-nodeid="16550">jspm</a> 工具，用于简化模块加载和处理包管理。<br>
+2014 年，打包工具 Webpack 发布了<a href="https://github.com/webpack/webpack/tags?after=v1.0.1" data-nodeid="16556">第一个稳定版本</a>。<br>
+2015 年，ES6（<a href="http://www.ecma-international.org/ecma-262/6.0/" data-nodeid="16562">ES2015</a>）规范正式发布，第一次从语言规范上定义了 JS 中的模块化。<br>
+2015 年，Rich Harris 发布的 <a href="https://rollupjs.org/guide/en/" data-nodeid="16568">Rollup</a> 项目，基于 ES6 模块化，提供了 Tree Shaking 的功能。</p>
+</blockquote>
+<h4 data-nodeid="16239">模块化的不同规范</h4>
+<ul data-nodeid="16240">
+<li data-nodeid="16241">
+<p data-nodeid="16242"><strong data-nodeid="16576">CommonJS</strong>：在 CommonJS 出现之前，一个 JS 类库只能通过暴露全局对象的方式，供其他 JS 文件使用，这样的方式有着诸多的问题，例如变量污染等。CommonJS 作为非浏览器端的 JS 规范，它的基本要素如下：</p>
+<ul data-nodeid="16243">
+<li data-nodeid="16244">
+<p data-nodeid="16245"><strong data-nodeid="16585">模块定义</strong>：一个模块即是一个 JS 文件，代码中自带 module 指向当前模块对象；自带 exports=module.exports，且 exports 只能是对象，用于添加导出的属性和方法；自带 require 方法用于引用其他模块。完整的 module 对象可参考<a href="https://nodejs.org/docs/latest/api/modules.html#modules_the_module_object" data-nodeid="16583">NodeJS 中的相关介绍</a>。</p>
+</li>
+<li data-nodeid="16246">
+<p data-nodeid="16247"><strong data-nodeid="16596">模块引用</strong>：通过引用 require() 函数来实现模块的引用，参数可以是相对路径也可以是绝对路径。在绝对路径的情况下，会按照 <a href="https://nodejs.org/docs/latest/api/modules.html#modules_loading_from_node_modules_folders" data-nodeid="16594">node_modules 规则</a>递归查找，在解析失败的情况下，会抛出异常。</p>
+</li>
+<li data-nodeid="16248">
+<p data-nodeid="16249"><strong data-nodeid="16605">模块加载</strong>：require() 的执行过程是同步的。执行时即进入到被依赖模块的执行上下文中，执行完毕后再执行依赖模块的后续代码。可参考官方文档中说明这一过程的<a href="https://nodejs.org/api/modules.html#modules_cycles" data-nodeid="16603">示例代码</a>。</p>
+</li>
+</ul>
+</li>
+<li data-nodeid="16250">
+<p data-nodeid="16251"><strong data-nodeid="16610">AMD</strong>：CommonJS 的 Modules/1.0 规范从一开始就注定了只能用于服务端，不能用于浏览器端。这一方面是因为模块文件中没有函数包裹，变量直接暴露到全局；另一方面则因为浏览器端的文件需要经过网络下载，不适合同步的依赖加载方式，因此出现了适用于浏览器端的模块化规范 AMD。AMD 规范的基本要素如下：</p>
+<ul data-nodeid="16252">
+<li data-nodeid="16253">
+<p data-nodeid="16254"><strong data-nodeid="16619">模块定义</strong>：通过define(id?, dependencies?, factory) 函数定义模块。id 为模块标识，dependencies 为依赖的模块，factory 为工厂函数。factory 传入的参数与 dependencies 对应，若不传 dependencies，则 factory 需要默认传入 require、exports，以及 module，或只传入 require，但<a href="https://requirejs.org/docs/commonjs.html" data-nodeid="16617">使用 return</a> 做导出。</p>
+</li>
+<li data-nodeid="16255">
+<p data-nodeid="16256"><strong data-nodeid="16632">模块引用</strong>：最早需要通过 require([id], callback) 方式引用，之后也支持了类似 CommonJS 的 var a = require('a') 的写法。</p>
+</li>
+</ul>
+</li>
+<li data-nodeid="16257">
+<p data-nodeid="16258"><strong data-nodeid="16637">UMD</strong>：UMD 本质上是兼容 CommonJS 与 AMD 这两种规范的代码语法糖，通过判断执行上下文中是否包含 define 或 module 来包装模块代码，适用于需要跨前后端的模块。</p>
+</li>
+<li data-nodeid="16259">
+<p data-nodeid="16260"><strong data-nodeid="16642">ES Module</strong>：ECMA 规范组织在 2015 年 6 月发布的 ES6 版本中，首次提出了 JS 标准的模块化概念，具体要素如下：</p>
+<ul data-nodeid="16261">
+<li data-nodeid="16262">
+<p data-nodeid="16263"><strong data-nodeid="16647">模块定义</strong>：模块内支持两种导出方式，一种通过 export 关键字导出任意个数的变量，另一种通过 export default 导出，一个模块中只能包含一个 default 的导出类型。</p>
+</li>
+<li data-nodeid="16264">
+<p data-nodeid="16265"><strong data-nodeid="16656">模块引用</strong>：通过 import 关键字引用其他模块。引用方式分为静态引用和动态引用。静态引用格式为<em data-nodeid="16657">import importClause from ModuleSpecifier</em>，import 表达式需要写在文件最外层上下文中；动态引用的方式则是 import()，返回 promise 对象。</p>
+</li>
+</ul>
+</li>
+</ul>
+<p data-nodeid="16266">下面我们介绍一些模块化的构建工具。</p>
+<h4 data-nodeid="16267">模块化的构建工具</h4>
+<ul data-nodeid="16268">
+<li data-nodeid="16269">
+<p data-nodeid="16270"><strong data-nodeid="16664">RequireJS</strong>：正如前面介绍的，RequireJS 的核心功能是支持 AMD 风格的模块化代码运行。</p>
+</li>
+<li data-nodeid="16271">
+<p data-nodeid="16272"><strong data-nodeid="16669">Browserify</strong>：与前者不同，Browserify 的目标是让 CommonJS 风格的代码也运行在浏览器端，除了提供语法糖外，还提供了一些经过处理后且在浏览器端运行的 NodeJS 的核心模块。</p>
+</li>
+<li data-nodeid="16273">
+<p data-nodeid="16274"><strong data-nodeid="16674">Babel</strong>：Babel 的定位一直是 Transformer，即语法转换器，它承担着将 ES6、JSX 等语法转换为 ES5 语法的核心功能，被广泛地运用于其他构建工具中。</p>
+</li>
+<li data-nodeid="16275">
+<p data-nodeid="16276"><strong data-nodeid="16679">SystemJS</strong>：SystemJS 是兼容各种模块化规范的运行时工具。</p>
+</li>
+<li data-nodeid="16277">
+<p data-nodeid="16278"><strong data-nodeid="16684">Webpack</strong>：Webpack 一方面兼容各种模块化规范的标识方法，另一方面将模块化的概念延伸到其他类型的文件中，创造性地打造了一种完全基于模块的新的构建体系。在下一节课中我会再深入讲解。</p>
+</li>
+<li data-nodeid="16279">
+<p data-nodeid="16280"><strong data-nodeid="16689">Rollup</strong>：Rollup 在诞生之初率先实现了 Tree Shaking 功能，以及天然支持 ES6 模块的打包。虽然这些主要功能在 Webpack 发展的后续版本中也逐步支持，但其简单的 API 仍然广受许多库开发者的青睐。</p>
+</li>
+</ul>
+<h3 data-nodeid="16281">总结</h3>
+<p data-nodeid="16282">这节课中，我们讨论了前端构建工具的演进：从早期的单独功能的压缩与合并工具，到 NodeJS 与包管理工具的诞生，随之而来的是任务式构建工具的发展，以及模块化概念与工具的不断探索。我们现在使用的构建工具，一方面立足于这些过去积累下来的前人的经验与智慧，另一方面也顺应着不断发展的前端开发需求。</p>
+<p data-nodeid="16283">本节课的课后讨论题是：最后出现的模块化的构建工具为什么能取代任务式的构建工具呢？以 Webpack 为例来聊聊看吧。</p>
+<p data-nodeid="16284">下节课，我们深入到 Webpack 的体系中，来聊一聊 Webpack 的完整工作流程。</p></div>
+
+
+
+<p data-nodeid="3">要想全面地分析 Webpack 构建工具的优化方案，首先要先对它的工作流程有一定理解，这样才能针对项目中可能存在的构建问题，进行有目标地分析和优化。</p>
+<h3 data-nodeid="4">Webpack 的基本工作流程</h3>
+<p data-nodeid="5">我们从两方面来了解 Webpack 的基本工作流程：</p>
+<ol data-nodeid="6">
+<li data-nodeid="7">
+<p data-nodeid="8">通过 Webpack 的源码来了解具体函数执行的逻辑。</p>
+</li>
+<li data-nodeid="9">
+<p data-nodeid="10">通过 Webpack 对外暴露的声明周期 Hooks，理解整体流程的阶段划分。</p>
+</li>
+</ol>
+<p data-nodeid="1959" class="">其中会涉及对 Webpack 源代码的分析，源代码取自 Webpack 仓库的 <a href="https://github.com/webpack/webpack/blob/webpack-4" data-nodeid="1963">webpack-4 分支</a>，而最新的 Webpack 5 中的优化我们会在后续课程中单独分析。</p>
+
+<p data-nodeid="12">通常，在项目中有两种运行 Webpack 的方式：基于命令行的方式或基于代码的方式。</p>
+<p data-nodeid="2745" class="">两种示例的代码分别如下（具体示例参照 <a href="https://github.com/fe-efficiency/lessons_fe_efficiency/tree/master/10_webpack_workflow" data-nodeid="2753">10_webpack_workflow</a>）：</p>
+
+<div class="course-code-area"><div class="copy-btn"><div class="copy-icon"></div>复制代码</div><pre><code data-language="javascript"><ol><li><div class="code-word"><span class="hljs-comment">//第一种：基于命令行的方式</span>
+</div></li><li><div class="code-word">webpack --config webpack.config.js
+</div></li><li><div class="code-word"><span class="hljs-comment">//第二种：基于代码的方式</span>
+</div></li><li><div class="code-word"><span class="hljs-keyword">var</span> webpack = <span class="hljs-built_in">require</span>(<span class="hljs-string">'webpack'</span>)
+</div></li><li><div class="code-word"><span class="hljs-keyword">var</span> config = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./webpack.config'</span>)
+</div></li><li><div class="code-word">webpack(config, <span class="hljs-function">(<span class="hljs-params">err, stats</span>) =&gt;</span> {})
+</div></li></ol></code></pre></div>
+<h4 data-nodeid="15">webpack.js 中的基本流程</h4>
+<p data-nodeid="4321" class="">无论用哪种方式运行 Webpack，本质上都是 <a href="https://github.com/webpack/webpack/blob/webpack-4/lib/webpack.js" data-nodeid="4325">webpack.js</a> 中的 Webpack 函数。</p>
+
+
+<p data-nodeid="17">这一函数的核心逻辑是：根据配置生成编译器实例 compiler，然后处理参数，执行 WebpackOptionsApply().process，根据参数加载不同内部插件。在有回调函数的情况下，根据是否是 watch 模式来决定要执行 compiler.watch 还是 compiler.run。</p>
+<p data-nodeid="18">为了讲解通用的流程，我们以没有 watch 模式的情况进行分析。简化流程后的代码示例如下：</p>
+<div class="course-code-area"><div class="copy-btn"><div class="copy-icon"></div>复制代码</div><pre><code data-language="javascript"><ol><li><div class="code-word"><span class="hljs-keyword">const</span> webpack = <span class="hljs-function">(<span class="hljs-params">options, callback</span>) =&gt;</span> {
+</div></li><li><div class="code-word">  options = ... <span class="hljs-comment">//处理options默认值</span>
+</div></li><li><div class="code-word">  <span class="hljs-keyword">let</span> compiler = <span class="hljs-keyword">new</span> Compiler(options.context)
+</div></li><li><div class="code-word">  ... <span class="hljs-comment">//处理参数中的插件等</span>
+</div></li><li><div class="code-word">  compiler.options = <span class="hljs-keyword">new</span> WebpackOptionsApply().process(options, compiler); <span class="hljs-comment">//分析参数，加载各内部插件</span>
+</div></li><li><div class="code-word">  ...
+</div></li><li><div class="code-word">  if (callback) {
+</div></li><li><div class="code-word">    ... 
+</div></li><li><div class="code-word">    compiler.run(callback)
+</div></li><li><div class="code-word">  }
+</div></li><li><div class="code-word">  <span class="hljs-keyword">return</span> compiler
+</div></li><li><div class="code-word">}
+</div></li></ol></code></pre></div>
+<h4 data-nodeid="20">Compiler.js 中的基本流程</h4>
+<p data-nodeid="5893" class="">我们再来看下运行编译器实例的内部逻辑，具体源代码在 <a href="https://github.com/webpack/webpack/blob/webpack-4/lib/Compiler.js" data-nodeid="5897">Compiler.js</a> 中。</p>
+
+
+<p data-nodeid="22">compiler.run(callback) 中的执行逻辑较为复杂，我们把它按流程抽象一下。抽象后的执行流程如下：</p>
+<ol data-nodeid="9235">
+<li data-nodeid="9236">
+<p data-nodeid="9237"><strong data-nodeid="9263">readRecords</strong>：读取<a href="https://webpack.js.org/configuration/other-options/#recordspath" data-nodeid="9261">构建记录</a>，用于分包缓存优化，在未设置 recordsPath 时直接返回。</p>
+</li>
+<li data-nodeid="9238">
+<p data-nodeid="9239"><strong data-nodeid="9268">compile 的主要构建过程</strong>，涉及以下几个环节：</p>
+<ol data-nodeid="9240">
+<li data-nodeid="9241" class="">
+<p data-nodeid="9242"><strong data-nodeid="9273">newCompilationParams</strong>：创建 NormalModule 和 ContextModule 的工厂实例，用于创建后续模块实例。</p>
+</li>
+<li data-nodeid="9243">
+<p data-nodeid="9244"><strong data-nodeid="9278">newCompilation</strong>：创建编译过程 Compilation 实例，传入上一步的两个工厂实例作为参数。</p>
+</li>
+<li data-nodeid="9245">
+<p data-nodeid="9246"><strong data-nodeid="9287">compiler.hooks.make.callAsync</strong>：触发 make 的 Hook，执行所有监听 make 的插件（例如 <a href="https://github.com/webpack/webpack/blob/webpack-4/lib/SingleEntryPlugin.js" data-nodeid="9285">SingleEntryPlugin.js</a> 中，会在相应的监听中触发 compilation 的 addEntry 方法）。其中，Hook 的作用，以及其他 Hook 会在下面的小节中再谈到。</p>
+</li>
+<li data-nodeid="9247">
+<p data-nodeid="9248"><strong data-nodeid="9292">compilation.finish</strong>：编译过程实例的 finish 方法，触发相应的 Hook 并报告构建模块的错误和警告。</p>
+</li>
+<li data-nodeid="9249">
+<p data-nodeid="9250"><strong data-nodeid="9297">compilation.seal</strong>：编译过程的 seal 方法，下一节中我会进一步分析。</p>
+</li>
+</ol>
+</li>
+<li data-nodeid="9251">
+<p data-nodeid="9252"><strong data-nodeid="9302">emitAssets</strong>：调用 compilation.getAssets()，将产物内容写入输出文件中。</p>
+</li>
+<li data-nodeid="9253">
+<p data-nodeid="9254"><strong data-nodeid="9307">emitRecords</strong>：对应第一步的 readRecords，用于写入构建记录，在未设置 recordsPath 时直接返回。</p>
+</li>
+</ol>
+
+
+
+
+<p data-nodeid="43">在编译器运行的流程里，核心过程是第二步编译。具体流程在生成的 Compilation 实例中进行，接下来我们再来看下这部分的源码逻辑。</p>
+<h4 data-nodeid="44">Compilation.js 中的基本流程</h4>
+<p data-nodeid="10874" class="">这部分的源码位于 <a href="https://github.com/webpack/webpack/blob/webpack-4/lib/Compilation.js" data-nodeid="10878">Compilation.js</a> 中。其中，在编译执行过程中，我们主要从外部调用的是两个方法：</p>
+
+
+<ol data-nodeid="46">
+<li data-nodeid="47">
+<p data-nodeid="48"><strong data-nodeid="261">addEntry</strong>：从 entry 开始递归添加和构建模块。</p>
+</li>
+<li data-nodeid="49">
+<p data-nodeid="50"><strong data-nodeid="266">seal</strong>：冻结模块，进行一系列优化，以及触发各优化阶段的 Hooks。</p>
+</li>
+</ol>
+<p data-nodeid="51">以上就是执行 Webpack 构建时的基本流程，这里再稍做总结：</p>
+<ol data-nodeid="52">
+<li data-nodeid="53">
+<p data-nodeid="54">创建编译器 Compiler 实例。</p>
+</li>
+<li data-nodeid="55">
+<p data-nodeid="56">根据 Webpack 参数加载参数中的插件，以及程序内置插件。</p>
+</li>
+<li data-nodeid="57">
+<p data-nodeid="58">执行编译流程：创建编译过程 Compilation 实例，从入口递归添加与构建模块，模块构建完成后冻结模块，并进行优化。</p>
+</li>
+<li data-nodeid="59">
+<p data-nodeid="60">构建与优化过程结束后提交产物，将产物内容写到输出文件中。</p>
+</li>
+</ol>
+<p data-nodeid="61">除了了解上面的基本工作流程外，还有两个相关的概念需要理解：Webpack 的生命周期和插件系统。</p>
+<h3 data-nodeid="62">读懂 Webpack 的生命周期</h3>
+<p data-nodeid="63">Webpack 工作流程中最核心的两个模块：Compiler 和 Compilation 都扩展自 Tapable 类，用于实现工作流程中的生命周期划分，以便在不同的生命周期节点上注册和调用<strong data-nodeid="283">插件</strong>。其中所暴露出来的生命周期节点称为<strong data-nodeid="284">Hook</strong>（俗称钩子）。</p>
+<h4 data-nodeid="64">Webpack 中的插件</h4>
+<p data-nodeid="65">Webpack 引擎基于插件系统搭建而成，不同的插件各司其职，在 Webpack 工作流程的某一个或多个时间点上，对构建流程的某个方面进行处理。Webpack 就是通过这样的工作方式，在各生命周期中，经一系列插件将源代码逐步变成最后的产物代码。</p>
+<p data-nodeid="66">一个 Webpack 插件是一个包含 apply 方法的 JavaScript 对象。这个 apply 方法的执行逻辑，通常是注册 Webpack 工作流程中某一生命周期 Hook，并添加对应 Hook 中该插件的实际处理函数。例如下面的代码：</p>
+<div class="course-code-area"><div class="copy-btn"><div class="copy-icon"></div>复制代码</div><pre><code data-language="javascript"><ol><li><div class="code-word"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">HelloWorldPlugin</span> </span>{
+</div></li><li><div class="code-word">  apply(compiler) {
+</div></li><li><div class="code-word">    compiler.hooks.run.tap(<span class="hljs-string">"HelloWorldPlugin"</span>, <span class="hljs-function"><span class="hljs-params">compilation</span> =&gt;</span> {
+</div></li><li><div class="code-word">      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'hello world'</span>);
+</div></li><li><div class="code-word">    })
+</div></li><li><div class="code-word">  }
+</div></li><li><div class="code-word">}
+</div></li><li><div class="code-word"><span class="hljs-built_in">module</span>.exports = HelloWorldPlugin;
+</div></li></ol></code></pre></div>
+<h4 data-nodeid="68">Hook 的使用方式</h4>
+<p data-nodeid="69">Hook 的使用分为四步：</p>
+<ol data-nodeid="70">
+<li data-nodeid="71">
+<p data-nodeid="72">在构造函数中定义 Hook 类型和参数，生成 Hook 对象。</p>
+</li>
+<li data-nodeid="73">
+<p data-nodeid="74">在插件中注册 Hook，添加对应 Hook 触发时的执行函数。</p>
+</li>
+<li data-nodeid="75">
+<p data-nodeid="76">生成插件实例，运行 apply 方法。</p>
+</li>
+<li data-nodeid="77">
+<p data-nodeid="78">在运行到对应生命周期节点时调用 Hook，执行注册过的插件的回调函数。如下面的代码所示：</p>
+</li>
+</ol>
+<div class="course-code-area"><div class="copy-btn"><div class="copy-icon"></div>复制代码</div><pre><code data-language="javascript"><ol><li><div class="code-word">lib/Compiler.js
+</div></li><li><div class="code-word"><span class="hljs-built_in">this</span>.hooks = {
+</div></li><li><div class="code-word">  ...
+</div></li><li><div class="code-word">  make: <span class="hljs-keyword">new</span> SyncHook([<span class="hljs-string">'compilation'</span>, <span class="hljs-string">'params'</span>]), <span class="hljs-comment">//1. 定义Hook</span>
+</div></li><li><div class="code-word">  ...
+</div></li><li><div class="code-word">}
+</div></li><li><div class="code-word">...
+</div></li><li><div class="code-word">this.hooks.compilation.call(compilation, params); <span class="hljs-comment">//4. 调用Hook</span>
+</div></li><li><div class="code-word">...
+</div></li><li><div class="code-word">lib/dependencies/CommonJsPlugin.js
+</div></li><li><div class="code-word"><span class="hljs-comment">//2. 在插件中注册Hook</span>
+</div></li><li><div class="code-word">compiler.hooks.compilation.tap(<span class="hljs-string">"CommonJSPlugin"</span>, <span class="hljs-function">(<span class="hljs-params">compilation, { contextModuleFactory, normalModuleFactory }</span>) =&gt;</span> {
+</div></li><li><div class="code-word">  ...
+</div></li><li><div class="code-word">})
+</div></li><li><div class="code-word">lib/WebpackOptionsApply.js
+</div></li><li><div class="code-word"><span class="hljs-comment">//3. 生成插件实例，运行apply方法</span>
+</div></li><li><div class="code-word"><span class="hljs-keyword">new</span> CommonJsPlugin(options.module).apply(compiler);
+</div></li></ol></code></pre></div>
+<p data-nodeid="80">以上就是 Webpack 中 Hook 的一般使用方式。正是通过这种方式，Webpack 将编译器和编译过程的生命周期节点提供给外部插件，从而搭建起弹性化的工作引擎。</p>
+<p data-nodeid="81">Hook 的类型按照同步或异步、是否接收上一插件的返回值等情况分为 9 种。不同类型的 Hook 接收注册的方法也不同，更多信息可参照<a href="https://github.com/webpack/tapable#tapable" data-nodeid="298">官方文档</a>。下面我们来具体介绍 Compiler 和 Compilation 中的 Hooks。</p>
+<h4 data-nodeid="82">Compiler Hooks</h4>
+<p data-nodeid="83">构建器实例的生命周期可以分为 3 个阶段：初始化阶段、构建过程阶段、产物生成阶段。下面我们就来大致介绍下这些不同阶段的 Hooks ：</p>
+<p data-nodeid="84"><strong data-nodeid="305">初始化阶段</strong></p>
+<ul data-nodeid="85">
+<li data-nodeid="86">
+<p data-nodeid="87">environment、afterEnvironment：在创建完 compiler 实例且执行了配置内定义的插件的 apply 方法后触发。</p>
+</li>
+<li data-nodeid="88">
+<p data-nodeid="89">entryOption、afterPlugins、afterResolvers：在 WebpackOptionsApply.js 中，这 3 个 Hooks 分别在执行 EntryOptions 插件和其他 Webpack 内置插件，以及解析了 resolver 配置后触发。</p>
+</li>
+</ul>
+<p data-nodeid="90"><strong data-nodeid="311">构建过程阶段</strong></p>
+<ul data-nodeid="91">
+<li data-nodeid="92">
+<p data-nodeid="93">normalModuleFactory、contextModuleFactory：在两类模块工厂创建后触发。</p>
+</li>
+<li data-nodeid="94">
+<p data-nodeid="95">beforeRun、run、watchRun、beforeCompile、compile、thisCompilation、compilation、make、afterCompile：在运行构建过程中触发。</p>
+</li>
+</ul>
+<p data-nodeid="96"><strong data-nodeid="317">产物生成阶段</strong></p>
+<ul data-nodeid="97">
+<li data-nodeid="98">
+<p data-nodeid="99">shouldEmit、emit、assetEmitted、afterEmit：在构建完成后，处理产物的过程中触发。</p>
+</li>
+<li data-nodeid="100">
+<p data-nodeid="101">failed、done：在达到最终结果状态时触发。</p>
+</li>
+</ul>
+<h4 data-nodeid="102">Compilation Hooks</h4>
+<p data-nodeid="103">构建过程实例的生命周期我们分为两个阶段：</p>
+<p data-nodeid="104"><strong data-nodeid="325">构建阶段</strong></p>
+<ul data-nodeid="105">
+<li data-nodeid="106">
+<p data-nodeid="107">addEntry、failedEntry、succeedEntry：在添加入口和添加入口结束时触发（Webpack 5 中移除）。</p>
+</li>
+<li data-nodeid="108">
+<p data-nodeid="109">buildModule、rebuildModule、finishRebuildingModule、failedModule、succeedModule：在构建单个模块时触发。</p>
+</li>
+<li data-nodeid="110">
+<p data-nodeid="111">finishModules：在所有模块构建完成后触发。</p>
+</li>
+</ul>
+<p data-nodeid="112"><strong data-nodeid="332">优化阶段</strong></p>
+<p data-nodeid="12424">优化阶段在 seal 函数中共有 12 个主要的处理过程，如下图所示：</p>
+<p data-nodeid="12425" class=""><img src="https://s0.lgstatic.com/i/image/M00/4D/B4/Ciqc1F9bGtqAJo4uAABnYGwsyYs218.png" alt="image (4).png" data-nodeid="12433"></p>
+
+
+
+<p data-nodeid="116">每个过程都暴露了相应的 Hooks，分别如下:</p>
+<ul data-nodeid="13214">
+<li data-nodeid="13215">
+<p data-nodeid="13216">seal、needAdditionalSeal、unseal、afterSeal：分别在 seal 函数的起始和结束的位置触发。</p>
+</li>
+<li data-nodeid="13217">
+<p data-nodeid="13218">optimizeDependencies、afterOptimizeDependencies：触发优化依赖的插件执行，例如FlagDependencyUsagePlugin。</p>
+</li>
+<li data-nodeid="13219">
+<p data-nodeid="13220">beforeChunks、afterChunks：分别在生成 Chunks 的过程的前后触发。</p>
+</li>
+<li data-nodeid="13221">
+<p data-nodeid="13222">optimize：在生成 chunks 之后，开始执行优化处理的阶段触发。</p>
+</li>
+<li data-nodeid="13223">
+<p data-nodeid="13224">optimizeModule、afterOptimizeModule：在优化模块过程的前后触发。</p>
+</li>
+<li data-nodeid="13225">
+<p data-nodeid="13226" class="">optimizeChunks、afterOptimizeChunks：在优化 Chunk 过程的前后触发，用于 <a href="https://webpack.js.org/guides/tree-shaking/" data-nodeid="13253">Tree Shaking</a>。</p>
+</li>
+<li data-nodeid="13227">
+<p data-nodeid="13228">optimizeTree、afterOptimizeTree：在优化模块和 Chunk 树过程的前后触发。</p>
+</li>
+<li data-nodeid="13229">
+<p data-nodeid="13230">optimizeChunkModules、afterOptimizeChunkModules：在优化 ChunkModules 的过程前后触发，例如 ModuleConcatenationPlugin，利用这一 Hook 来做<a href="https://webpack.js.org/plugins/module-concatenation-plugin/#optimization-bailouts" data-nodeid="13259">Scope Hoisting</a>的优化。</p>
+</li>
+<li data-nodeid="13231">
+<p data-nodeid="13232">shouldRecord、recordModules、recordChunks、recordHash：在 shouldRecord 返回为 true 的情况下，依次触发 recordModules、recordChunks、recordHash。</p>
+</li>
+<li data-nodeid="13233">
+<p data-nodeid="13234">reviveModules、beforeModuleIds、moduleIds、optimizeModuleIds、afterOptimizeModuleIds：在生成模块 Id 过程的前后触发。</p>
+</li>
+<li data-nodeid="13235">
+<p data-nodeid="13236">reviveChunks、beforeChunkIds、optimizeChunkIds、afterOptimizeChunkIds：在生成 Chunk id 过程的前后触发。</p>
+</li>
+<li data-nodeid="13237">
+<p data-nodeid="13238">beforeHash、afterHash：在生成模块与 Chunk 的 hash 过程的前后触发。</p>
+</li>
+<li data-nodeid="13239">
+<p data-nodeid="13240">beforeModuleAssets、moduleAsset：在生成模块产物数据过程的前后触发。</p>
+</li>
+<li data-nodeid="13241">
+<p data-nodeid="13242">shouldGenerateChunkAssets、beforeChunkAssets、chunkAsset：在创建 Chunk 产物数据过程的前后触发。</p>
+</li>
+<li data-nodeid="13243">
+<p data-nodeid="13244">additionalAssets、optimizeChunkAssets、afterOptimizeChunkAssets、optimizeAssets、afterOptimizeAssets：在优化产物过程的前后触发，例如在 TerserPlugin 的<a href="https://github.com/webpack-contrib/terser-webpack-plugin/blob/master/src/index.js" data-nodeid="13270">压缩代码</a>插件的执行过程中，就用到了 optimizeChunkAssets。</p>
+</li>
+</ul>
+
+<h3 data-nodeid="148">代码实践：编写一个简单的统计插件</h3>
+<p data-nodeid="149">在了解了 Webpack 的工作流程后，下面我们进行一个简单的实践。</p>
+<p data-nodeid="14052" class="">编写一个统计构建过程生命周期耗时的插件，这类插件会作为后续优化构建效率的准备工作。插件片段示例如下（完整代码参见 <a href="https://github.com/fe-efficiency/lessons_fe_efficiency/tree/master/10_webpack_workflow" data-nodeid="14060">10_webpack_workflow</a>）：</p>
+
+<div class="course-code-area"><div class="copy-btn"><div class="copy-icon"></div>复制代码</div><pre><code data-language="java"><ol><li><div class="code-word"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SamplePlugin</span> </span>{
+</div></li><li><div class="code-word">  apply(compiler) {
+</div></li><li><div class="code-word">    <span class="hljs-keyword">var</span> start = Date.now()
+</div></li><li><div class="code-word">    <span class="hljs-keyword">var</span> statsHooks = [<span class="hljs-string">'environment'</span>, <span class="hljs-string">'entryOption'</span>, <span class="hljs-string">'afterPlugins'</span>, <span class="hljs-string">'compile'</span>]
+</div></li><li><div class="code-word">    <span class="hljs-keyword">var</span> statsAsyncHooks = [
+</div></li><li><div class="code-word">      <span class="hljs-string">'beforeRun'</span>,
+</div></li><li><div class="code-word">      <span class="hljs-string">'beforeCompile'</span>,
+</div></li><li><div class="code-word">      <span class="hljs-string">'make'</span>,
+</div></li><li><div class="code-word">      <span class="hljs-string">'afterCompile'</span>,
+</div></li><li><div class="code-word">      <span class="hljs-string">'emit'</span>,
+</div></li><li><div class="code-word">      <span class="hljs-string">'done'</span>,
+</div></li><li><div class="code-word">    ]
+</div></li><li><div class="code-word">
+</div></li><li><div class="code-word">    statsHooks.forEach((hookName) =&gt; {
+</div></li><li><div class="code-word">      compiler.hooks[hookName].tap(<span class="hljs-string">'Sample Plugin'</span>, () =&gt; {
+</div></li><li><div class="code-word">        console.log(`Compiler Hook ${hookName}, Time: ${Date.now() - start}ms`)
+</div></li><li><div class="code-word">      })
+</div></li><li><div class="code-word">    })
+</div></li><li><div class="code-word">    ...
+</div></li><li><div class="code-word">  }
+</div></li><li><div class="code-word">})
+</div></li><li><div class="code-word"><span class="hljs-keyword">module</span>.<span class="hljs-keyword">exports</span> = SamplePlugin;
+</div></li></ol></code></pre></div>
+<p data-nodeid="18826">执行构建后，可以看到在控制台输出了相应的统计时间结果（这里的时间是从构建起始到各阶段 Hook 触发为止的耗时），如下图所示：</p>
+<p data-nodeid="18827" class=""><img src="https://s0.lgstatic.com/i/image/M00/4D/B4/Ciqc1F9bGvGAFRmpAAGFrvBhTHE475.png" alt="image (5).png" data-nodeid="18835"></p>
+
+
+<p data-nodeid="17254">根据这样的输出结果，我们就可以分析项目里各阶段的耗时情况，再进行针对性地优化。这个统计插件将在后面几课的优化实践中运用。</p>
+<p data-nodeid="17255">除了这类自己编写的统计插件外，Webpack 社区中也有一些较成熟的统计插件，例如<a href="https://github.com/stephencookdev/speed-measure-webpack-plugin" data-nodeid="17268">speed-measure-webpack-plugin</a>等，感兴趣的话，你可以进一步了解。</p>
+<h3 data-nodeid="17256">总结</h3>
+<p data-nodeid="17257">这一课时起，我们进入了 Webpack 构建优化的主题。在这节课中，我主要为你勾画了一个 Webpack 工作流程的轮廓，通过对三个源码文件的分析，让你对执行构建命令后的内部流程有一个基本概念。然后我们讨论了 Compiler 和 Compilation 工作流程中的生命周期 Hooks，以及插件的基本工作方式。最后，我们编写了一个简单的统计插件，用于实践上面所讲的课程内容。</p>
+<p data-nodeid="17258">今天的课后思考题是：在今天介绍的 Compiler 和 Compilation 的各生命周期阶段里，通常耗时最长的分别是哪个阶段呢？可以结合自己所在的项目测试分析一下。</p></div>
+  </div>
+</div>
+</body>
+</html>
